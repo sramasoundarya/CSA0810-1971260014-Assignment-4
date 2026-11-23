@@ -1,0 +1,16 @@
+The same three-day test applied to the repaired program (Task04/test_fixed.py)
+"""Task 4.2/4.3 - same three-day test against the repaired program."""
+import os
+for f in ("returns.log", "library_errors.log", "day1.txt", "day2.txt", "day3.txt", "day4.txt"):
+    if os.path.exists(f): os.remove(f)     # clean up BEFORE the logger opens its file
+import library_fixed as lib
+for i, books in enumerate([["Python Basics", "Data Structures"], ["Operating Systems", "DBMS", "Networks"],
+    ["Algorithms"]], 1):
+    open(f"day{i}.txt", "w").write("\n".join(books) + "\n")
+for d in ("day1.txt", "day2.txt", "day3.txt"):
+    lib.process(d)
+print("returns.log after three days:"); print(open("returns.log").read())
+lib.process("day_missing.txt")
+open("day4.txt", "wb").write(b"\xff\xfe broken bytes\n")
+lib.process("day4.txt")
+print("--- library_errors.log ---")
