@@ -1,0 +1,17 @@
+# Task 1 - the ORIGINAL poor script (kept only for diagnosis; paths adapted so it can run here)
+import sys
+path = sys.argv[1] if len(sys.argv) > 1 else "mess_oct.txt"   # original:
+    C:\\Users\\Office\\Desktop\\mess_oct.txt
+f = open(path)
+data = f.read()
+total = 0
+report = ""
+for line in data.split("\n"):
+    try:
+        parts = line.split(",")
+        total = total + int(parts[2])
+        report = report + parts[1] + " " + parts[2] + "\n"
+    except:
+        pass
+print(report)
+print("Total", total
