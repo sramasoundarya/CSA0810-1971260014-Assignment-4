@@ -1,0 +1,42 @@
+Design points
+  * file name is a PARAMETER (no hard-coded path)
+  * `with` statement closes the file even when an error occurs
+  * the file is read LINE BY LINE (constant memory)
+  * specific exceptions only; no bare except / pass
+  * Decimal is used for money (no float rounding error, paise accepted)
+  * every rejected line is kept with its line number and the reason
+  * blank lines (e.g. the last empty line) are skipped on purpose
+  * the report is built with a list + join (linear time), not repeated +
+"""
+import sys
+from decimal import Decimal, InvalidOperation
+def total_mess_bills(path):
+    """Return (total, report_lines, rejected) for the mess-bill file `path`.
+    rejected is a list of (line_number, original_line, reason).
+    """
+    total = Decimal("0")
+    report_lines = []
+    rejected = []
+    with open(path, "r", encoding="utf-8") as f:          # closed automatically
+        for number, raw in enumerate(f, start=1):          # one line at a time
+            line = raw.strip()
+            if not line:                                   # blank line: not an error
+                continue
+            parts = [p.strip() for p in line.split(",")]
+            try:
+                if len(parts) != 3:
+                    raise ValueError(f"expected 3 fields, found {len(parts)}")
+                register_no, name, amount_text = parts
+                amount = Decimal(amount_text)              # accepts 1250.50
+                if not amount.is_finite() or amount < 0:
+                    raise ValueError(f"invalid amount {amount_text!r}")
+            except (ValueError, InvalidOperation) as err:
+                reason = str(err) if isinstance(err, ValueError) else f"invalid amount {parts[-1]!r}"
+                rejected.append((number, line, reason))
+                continue
+            total += amount
+            report_lines.append(f"{register_no}  {name:<12} {amount:>10}")
+    return total, report_lines, rejected
+def main(path):
+    try:
+        total, report_lines, rejected = total_mess_bills(path
