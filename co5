@@ -1,0 +1,21 @@
+"""Task 4.3 - repaired program: append mode, newline characters, with statements, error log."""
+import logging
+logging.basicConfig(filename="library_errors.log", level=logging.ERROR,
+                    format="%(asctime)s %(levelname)s %(message)s")
+def save_returns(books, log_name="returns.log"):
+    with open(log_name, "a", encoding="utf-8") as log:      # "a": never erase earlier days
+        for b in books:
+            log.write(b + "\n")                              # one book per line
+def process(day_file, log_name="returns.log"):
+    try:
+        with open(day_file, "r", encoding="utf-8") as f:     # closed automatically
+            books = [line.strip() for line in f if line.strip()]   # drop blank last line
+        save_returns(books, log_name)
+        return True
+    except FileNotFoundError:
+        logging.error("day file missing: %s", day_file)
+        print("missing:", day_file)
+    except (OSError, UnicodeDecodeError):
+        logging.exception("could not process %s", day_file)  # message + traceback are SAVED
+        print("failed (see library_errors.log):", day_file)
+    return False
