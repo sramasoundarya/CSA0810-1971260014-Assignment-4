@@ -1,0 +1,49 @@
+"""Task 3.3 - complete try statement: try / except (specific) / else / finally + raise ... from ..."""
+class InvalidRecord(Exception):
+    """A line is not in the expected format."""
+class ProcessingError(Exception):
+    """Whole-file failure, wraps the original cause."""
+def parse_line(line):
+    parts = line.strip().split(",")
+    if len(parts) != 3:
+        raise InvalidRecord(f"expected 3 fields, found {len(parts)}")
+    if parts[2] not in ("P", "A"):
+        raise InvalidRecord(f"invalid status {parts[2]!r}")
+    return tuple(parts)
+def process(path):
+    present = absent = 0
+    errors = []
+    f = None
+    try:
+        f = open(path, "r", encoding="utf-8")
+        for number, line in enumerate(f, 1):
+            try:
+                _, _, status = parse_line(line)
+            except InvalidRecord as err:
+                errors.append((number, str(err)))
+            else:
+                present += status == "P"
+                absent += status == "A"
+    except FileNotFoundError as err:
+        raise ProcessingError(f"attendance file missing: {path}") from err   # keeps the cause
+    except UnicodeDecodeError as err:
+        raise ProcessingError(f"file is not UTF-8: {path}") from err
+    else:
+        print("   else    : file processed without a file-level failure")
+    finally:
+        if f is not None:
+            f.close()
+            print("   finally : file closed")
+        else:
+            print("   finally : nothing to close")
+    return present, absent, errors
+import os, tempfile
+with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as t:
+    t.write("192311001,2026-10-08,P\n192311003,2026-10-08\n")
+print("run 1 (good file):"); print("  ", process(t.name)); os.remove(t.name)
+print("run 2 (missing file):")
+try:
+    process("nofile.csv")
+except ProcessingError as e:
+    print("   caught :", e)
+    print("   cause  :", repr(e.__cause__))
