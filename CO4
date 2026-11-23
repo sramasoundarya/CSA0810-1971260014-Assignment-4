@@ -1,0 +1,17 @@
+"""Task 4.2 - evidence: run process() for three days and print the log (buggy version)."""
+import os, builtins
+import library_buggy as lib
+for f in ("returns.log", "day1.txt", "day2.txt", "day3.txt"):
+    if os.path.exists(f): os.remove(f)
+for i, books in enumerate([["Python Basics", "Data Structures"], ["Operating Systems", "DBMS", "Networks"],
+    ["Algorithms"]], 1):
+    open(f"day{i}.txt", "w").write("\n".join(books) + "\n")      # note the final newline
+Page 20
+CSA08 - Assignment 4 : File Handling, Modules and Packages (CO4)
+print("Defect 1 - earlier days are lost (mode 'w'), Defect 2 - books joined (no newline)")
+for d in ("day1.txt", "day2.txt", "day3.txt"):
+    lib.process(d)
+    print(f"  after {d}: returns.log = {open('returns.log').read()!r}")
+print("\nDefect 3 - what happens to the open file when write() fails")
+class SpyFile:
+    """Wraps a real file; the 2nd write() fails like a full disk / bad data would."""
